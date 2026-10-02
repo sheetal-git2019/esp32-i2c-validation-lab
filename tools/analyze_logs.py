@@ -6,7 +6,7 @@ Usage:
 
 The input format is CSV with at least timestamp_s, test_id, read_ms, and status.
 Install matplotlib first when a plot is required:
-    python -m pip install -r requirements.txt
+    python -m pip install -r tools/requirements.txt
 """
 
 from __future__ import annotations
@@ -56,7 +56,7 @@ def write_plot(rows: list[dict[str, str]], output_path: Path) -> None:
     except ImportError as exc:
         raise SystemExit(
             "Plot not generated: install matplotlib with "
-            "'python -m pip install -r requirements.txt'."
+            "'python -m pip install -r tools/requirements.txt'."
         ) from exc
 
     measurements = timing_rows(rows)

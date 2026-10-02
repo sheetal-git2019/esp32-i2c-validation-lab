@@ -36,6 +36,7 @@ The interactive demo includes:
 ├── index.html                     # Portfolio website
 ├── styles.css                     # Responsive visual design
 ├── tools/analyze_logs.py          # CSV summary and timing plot
+├── tools/requirements.txt          # Optional plotting dependency
 └── vercel.json                    # Static Vercel configuration
 ```
 
@@ -62,7 +63,7 @@ python tools/analyze_logs.py data/simulated_uart_log.csv --no-plot
 To generate `validation_summary.png`:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install -r tools/requirements.txt
 python tools/analyze_logs.py data/simulated_uart_log.csv
 ```
 

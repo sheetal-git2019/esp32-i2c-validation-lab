@@ -1,0 +1,8 @@
+timestamp_s,test_id,scenario,address,clock_khz,read_ms,ack,status,notes
+0.500,TC-01,nominal,0x76,400,4.8,1,PASS,Three-byte pressure register read
+1.000,TC-01,nominal,0x76,400,4.7,1,PASS,Three-byte pressure register read
+1.500,TC-01,nominal,0x76,400,4.9,1,PASS,Three-byte pressure register read
+2.000,TC-02,wrong_address,0x77,400,0.9,0,NACK,Expected negative test result
+2.500,TC-03,sda_stuck_low,NA,400,25.0,0,RECOVERED,Timeout followed by bus recovery
+3.000,TC-04,boundary_clock,0x76,100,19.2,1,TIMING_VIOLATION,Expected timing violation
+3.500,TC-05,regression,0x76,400,4.8,1,PASS,Address correction verified

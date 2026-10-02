@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Simulation-based ESP32 I2C bring-up, fault injection, and validation portfolio project.">
+    <title>ESP32 I²C Validation Lab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="ESP32 I2C Validation Lab home">
+        <span class="brand-mark" aria-hidden="true">↯</span>
+        <span>Validation Lab</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#demo">Demo</a>
+        <a href="#test-plan">Test plan</a>
+        <a href="#debug">Debug story</a>
+        <a href="#evidence">Evidence</a>
+      </nav>
+      <a class="nav-cta" href="https://github.com/" target="_blank" rel="noreferrer">View source</a>
+    </header>
+
+    <main id="main">
+      <section id="top" class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Portfolio project · simulation-based</p>
+          <h1>ESP32 I²C bring-up,<br>fault injection, and validation.</h1>
+          <p class="hero-lede">A requirements-led validation exercise for an ESP32 master reading a BME280-class I²C sensor. It models the evidence trail from requirement to test, defect, root cause, and regression result.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#demo">Run the demo</a>
+            <a class="text-link" href="#debug">Read defect report <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+        <aside class="project-card" aria-label="Project scope">
+          <div class="project-card-top">
+            <span class="status-dot"></span>
+            <span>Simulation environment</span>
+          </div>
+          <dl>
+            <div>
+              <dt>Interface</dt>
+              <dd>I²C · 400 kHz target</dd>
+            </div>
+            <div>
+              <dt>Device under test</dt>
+              <dd>ESP32 controller model</dd>
+            </div>
+            <div>
+              <dt>Peripheral model</dt>
+              <dd>BME280 at 0x76</dd>
+            </div>
+            <div>
+              <dt>Validation focus</dt>
+              <dd>Function, timing, fault handling</dd>
+            </div>
+          </dl>
+          <p class="simulation-note">All waveforms, UART logs, and timing values on this site are generated simulations—not physical measurements.</p>
+        </aside>
+      </section>
+
+      <section class="requirements-band" aria-labelledby="requirements-title">
+        <div>
+          <p class="eyebrow">Primary requirement</p>
+          <h2 id="requirements-title">REQ-I2C-002</h2>
+        </div>
+        <p>The firmware shall complete a valid three-byte I²C sensor-register read in <strong>10 ms or less</strong>, while detecting a missing acknowledge and a bus-stuck condition.</p>
+        <a class="text-link" href="#test-plan">Open test plan <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section id="demo" class="section demo-section" aria-labelledby="demo-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Interactive fault-injection demo</p>
+            <h2 id="demo-title">Inspect the expected evidence.</h2>
+          </div>
+          <p>Choose a scenario, adjust clock rate, and run a simulated test. The waveform is deliberately labeled as simulated so it never implies a physical logic-analyzer capture.</p>
+        </div>
+
+        <div class="demo-controls">
+          <label>
+            <span>Scenario</span>
+            <select id="scenario">
+              <option value="nominal">Nominal read</option>
+              <option value="wrong-address">Negative: wrong device address</option>
+              <option value="sda-low">Negative: SDA held low</option>
+              <option value="slow-clock">Boundary: reduced clock rate</option>
+            </select>
+          </label>
+          <label class="range-field">
+            <span>Clock rate <output id="rate-label" for="clock-rate">400 kHz</output></span>
+            <input id="clock-rate" type="range" min="50" max="400" value="400" step="50">
+            <span class="range-ticks" aria-hidden="true"><span>50</span><span>400 kHz</span></span>
+          </label>
+          <div class="control-actions">
+            <button id="run-test" class="button button-primary" type="button">Run test</button>
+            <button id="reset-test" class="button button-secondary" type="button">Restore nominal</button>
+          </div>
+        </div>
+
+        <div class="test-outcome" aria-live="polite">
+          <article class="metric-card">
+            <p>Requirement</p>
+            <strong>I²C read ≤ 10 ms</strong>
+            <span>ADDR 0x76 · 400 kHz target</span>
+          </article>
+          <article class="metric-card">
+            <p>Observed</p>
+            <strong id="observed-time">4.8 ms</strong>
+            <span id="observed-context">3 data bytes returned</span>
+          </article>
+          <article class="metric-card">
+            <p>Verdict</p>
+            <strong id="verdict" class="pass">PASS</strong>
+            <span id="verdict-context">all acceptance criteria met</span>
+          </article>
+        </div>
+
+        <article class="logic-panel">
+          <div class="logic-panel-heading">
+            <div>
+              <p class="eyebrow">Simulated logic-analyzer trace</p>
+              <h3 id="trace-title">Nominal register read</h3>
+            </div>
+            <span id="scenario-badge" class="scenario-badge">Nominal</span>
+          </div>
+          <p id="trace-detail" class="trace-detail">START → 0x76(W) → 0xF7 → repeated START → 0x76(R) → 3 data bytes → STOP</p>
+          <svg id="logic-trace" viewBox="0 0 980 310" role="img" aria-labelledby="logic-trace-title logic-trace-description">
+            <title id="logic-trace-title">Simulated I2C waveform</title>
+            <desc id="logic-trace-description">SCL and SDA traces produced by the browser simulator for the currently selected test case.</desc>
+            <rect x="103" y="42" width="835" height="190" class="trace-frame"></rect>
+            <g class="trace-grid">
+              <line x1="103" y1="232" x2="938" y2="232"></line>
+              <line x1="103" y1="42" x2="103" y2="236"></line>
+              <line x1="312" y1="42" x2="312" y2="236"></line>
+              <line x1="521" y1="42" x2="521" y2="236"></line>
+              <line x1="730" y1="42" x2="730" y2="236"></line>
+              <line x1="938" y1="42" x2="938" y2="236"></line>
+            </g>
+            <g class="trace-text">
+              <text x="25" y="100">SCL</text>
+              <text x="25" y="185">SDA</text>
+              <text x="103" y="266">0 µs</text>
+              <text x="284" y="266">1,200</text>
+              <text x="493" y="266">2,400</text>
+              <text x="702" y="266">3,600</text>
+              <text x="901" y="266">4,800</text>
+              <text x="864" y="294">time (µs)</text>
+            </g>
+            <g id="trace-labels" class="trace-labels"></g>
+            <path id="scl-path" class="scl-path"></path>
+            <path id="sda-path" class="sda-path"></path>
+          </svg>
+          <div class="trace-legend">
+            <span><i class="legend-line scl-line" aria-hidden="true"></i>SCL</span>
+            <span><i class="legend-line sda-line" aria-hidden="true"></i>SDA</span>
+            <span>ACK = receiver pulls SDA low</span>
+          </div>
+          <p id="test-message" class="test-message pass">PASS — 3-byte pressure read completed in 4.8 ms; requirement met.</p>
+        </article>
+      </section>
+
+      <section id="test-plan" class="section" aria-labelledby="test-plan-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Traceability</p>
+            <h2 id="test-plan-title">Test plan at a glance.</h2>
+          </div>
+          <p>Each test is tied to an observable criterion. Fault tests are expected to fail at the interface level; the pass condition is correct fault detection and reporting.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Test ID</th>
+                <th scope="col">Test type</th>
+                <th scope="col">Stimulus</th>
+                <th scope="col">Expected result</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>TC-01</td>
+                <td>Functional</td>
+                <td>0x76 register read at 400 kHz</td>
+                <td>Three bytes, all ACKs, ≤ 10 ms</td>
+                <td><span class="table-status pass">Pass</span></td>
+              </tr>
+              <tr>
+                <td>TC-02</td>
+                <td>Negative</td>
+                <td>Request 0x77 (wrong address)</td>
+                <td>NACK detected and logged</td>
+                <td><span class="table-status pass">Pass</span></td>
+              </tr>
+              <tr>
+                <td>TC-03</td>
+                <td>Negative</td>
+                <td>Hold SDA low before START</td>
+                <td>Timeout and bus recovery path</td>
+                <td><span class="table-status pass">Pass</span></td>
+              </tr>
+              <tr>
+                <td>TC-04</td>
+                <td>Boundary</td>
+                <td>100 kHz clock setting</td>
+                <td>Timing violation is flagged</td>
+                <td><span class="table-status pass">Pass</span></td>
+              </tr>
+              <tr>
+                <td>TC-05</td>
+                <td>Regression</td>
+                <td>Correct address restored</td>
+                <td>Nominal read passes again</td>
+                <td><span class="table-status pass">Pass</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="debug" class="section debug-section" aria-labelledby="debug-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Defect investigation</p>
+            <h2 id="debug-title">One defect, closed with evidence.</h2>
+          </div>
+          <p>A concise debug narrative is more valuable to a hiring manager than a long list of happy-path screenshots.</p>
+        </div>
+        <div class="debug-grid">
+          <article>
+            <span class="debug-index">01</span>
+            <h3>Symptom</h3>
+            <p>Sensor initialization returns no data, and the serial log records an I²C acknowledge failure.</p>
+          </article>
+          <article>
+            <span class="debug-index">02</span>
+            <h3>Isolation</h3>
+            <p>The simulated trace stops after <code>0x77(W)</code>. The configured peripheral model listens on <code>0x76</code>.</p>
+          </article>
+          <article>
+            <span class="debug-index">03</span>
+            <h3>Root cause</h3>
+            <p>A firmware configuration constant used the alternate BME280 address with the address-select pin modeled low.</p>
+          </article>
+          <article>
+            <span class="debug-index">04</span>
+            <h3>Resolution</h3>
+            <p>Correct the address, repeat the nominal test, and retain TC-02 as a regression test for fault handling.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="evidence" class="section evidence-section" aria-labelledby="evidence-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Automation evidence</p>
+            <h2 id="evidence-title">UART logs, summarized in Python.</h2>
+          </div>
+          <p>The repository includes a dependency-light parser and a simulated log fixture. With hardware later, the fixture can be replaced with captured serial output.</p>
+        </div>
+        <div class="evidence-grid">
+          <pre class="terminal" aria-label="Example simulated UART log"><code><span class="terminal-muted"># simulated UART output</span>
+<span class="terminal-time">00:00.500</span> I2C addr=0x76 read_ms=4.8 ack=1 status=PASS
+<span class="terminal-time">00:01.000</span> I2C addr=0x76 read_ms=4.7 ack=1 status=PASS
+<span class="terminal-time">00:01.500</span> I2C addr=0x77 read_ms=0.9 ack=0 status=NACK
+<span class="terminal-time">00:02.000</span> I2C bus=sda_low timeout_ms=25 status=RECOVERED
+<span class="terminal-time">00:02.500</span> I2C addr=0x76 read_ms=4.9 ack=1 status=PASS</code></pre>
+          <div class="evidence-copy">
+            <p class="eyebrow">Included utility</p>
+            <h3>Turn raw logs into test evidence.</h3>
+            <p><code>tools/analyze_logs.py</code> calculates pass/fail counts, reports the maximum read time, and writes a timing plot from <code>data/simulated_uart_log.csv</code>.</p>
+            <div class="code-line"><code>python tools/analyze_logs.py data/simulated_uart_log.csv</code></div>
+            <a class="text-link" href="#top">Return to project scope <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>ESP32 I²C Validation Lab</span>
+      <span>Built as a transparent simulation portfolio project.</span>
+      <a href="#top">Back to top</a>
+    </footer>
+    <script src="app.js"></script>
+  </body>
+</html>
